@@ -128,7 +128,7 @@ y=np.zeros([2*n,2])
 y[:n,1] = 1
 y[n:,0] = 1
 make_trainable(discriminator,True)
-discrimnator.fit(X,y,nb_epoch=1, batch_size=32)
+discriminator.fit(X,y,nb_epoch=1, batch_size=32)
 y_hat = discriminator.predict(X)
 y_hat_idx=np.argmax(y_hat,axis=1)
 print(len(y_hat))
@@ -138,3 +138,32 @@ n_tot=y.shape[0]
 n_rig=(diff==0).sum()
 acc = n_rig*100.0/n_tot
 print("Accuracy: %0.02f pct (%d of %d) right"%(acc, n_rig, n_tot))
+
+def train_for_n(nb_epoch=5000,BATCH_SIZE=32):
+	for e in tqdm(range(nb_epoch)):
+		#creat image
+		image_bacth=X.train[np.random.randint(0,X.train[0],size=BATCH_SIZE),:,:,:]
+		noise_gen=np.random.uniform(0,1,size=[BATCH_SiZE,100])
+		generated_images=generator.predict(noise_gen)
+
+        #train dis
+        X=np.concatenate((image_batch,generated_images))
+        y=np.zeros([2*BATCH_SIZE,2])
+        y[0:BATCH_SIZE,1]=1
+
+
+        y[BATCH_SIZE:, 0] =1
+        make_trainable(discriminator,True)
+        d_loss=discriminator.train_on_batch(X,y)
+        losses["d"].append(d_loss)
+
+
+        noise_tr= np.random.uniform(0,1,size=[BATCH_SIZE,100])
+        y2=zeros([BATCH_SIZE,2])
+        y2[:,1]=1
+
+        make_trainable(discirminator,False)
+        g_loss=GAN.train_on_batch(noise_tr,y2)
+        losses["g"].append(g_loss)
+
+train_for_n(nb_epoch=5000,BATCH_SIZE=32)
